@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 interface PhotoDao {
 
     @Insert
-    suspend fun insertPhotos(vararg photos: PhotoEntity)
+    suspend fun insertPhotos(photos: List<PhotoEntity>)
 
     @Query("SELECT * FROM photos")
-    fun getPhotos(): Flow<PhotoEntity>
+    fun getPhotos(): Flow<List<PhotoEntity>>
 
     @Query("DELETE FROM photos")
     suspend fun deleteAll()

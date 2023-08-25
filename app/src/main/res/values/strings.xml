@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PhotoFeed</string>
+    <string name="error_feed">Feed could not be loaded</string>
+    <string name="label_retry">Retry</string>
 </resources>
