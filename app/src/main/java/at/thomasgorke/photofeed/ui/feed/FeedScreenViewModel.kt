@@ -20,25 +20,16 @@ class FeedScreenViewModel(
     val state = _state.asStateFlow()
 
     init {
-        println("viewmodel")
         viewModelScope.launch {
             dataSource.getFeedFlow()
                 .onEach { feedData ->
-                    println("did sth $feedData")
                     when (feedData) {
                         is RepositoryResponse.Error -> {
-                            /* show error */
-                            println("error")
+                            /* TODO show error */
                         }
 
-                        is RepositoryResponse.Success -> {
-                            if (feedData.data.isEmpty()) {
-//                                dataSource.fetchNewRemoteFeed()
-                            } else {
-                                _state.update {
-                                    it.copy(feed = feedData.data)
-                                }
-                            }
+                        is RepositoryResponse.Success -> _state.update {
+                            it.copy(feed = feedData.data)
                         }
                     }
                 }
@@ -47,7 +38,11 @@ class FeedScreenViewModel(
     }
 
     fun execute(action: Action) {
-
+        viewModelScope.launch {
+            when (action) {
+                Action.Retry -> dataSource.fetchNewRemoteFeed()
+            }
+        }
     }
 
     data class State(

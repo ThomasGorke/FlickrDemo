@@ -2,4 +2,8 @@
     <string name="app_name">PhotoFeed</string>
     <string name="error_feed">Feed could not be loaded</string>
     <string name="label_retry">Retry</string>
+    <string name="title_feed">Feed</string>
+    <string name="title_search">Search</string>
+    <string name="title_profile">Profile</string>
+    <string name="placeholder_search">Enter tags</string>
 </resources>

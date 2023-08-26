@@ -2,7 +2,7 @@ package at.thomasgorke.photofeed
 
 import android.app.Application
 import at.thomasgorke.photofeed.data.dataModules
-import at.thomasgorke.photofeed.ui.uiModules
+import at.thomasgorke.photofeed.ui.uiModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -16,7 +16,7 @@ class PhotoFeedApp : Application() {
         startKoin {
             androidLogger(level = Level.INFO)
             androidContext(applicationContext)
-            modules(appModule + uiModules + dataModules)
+            modules(appModule + uiModule + dataModules)
         }
     }
 }

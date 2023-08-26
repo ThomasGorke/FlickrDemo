@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import at.thomasgorke.photofeed.ui.feed.FeedScreen
+import at.thomasgorke.photofeed.ui.root.RootScreen
 import at.thomasgorke.photofeed.ui.theme.PhotoFeedTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    FeedScreen()
+                    RootScreen()
                 }
             }
         }
