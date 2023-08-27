@@ -1,14 +1,49 @@
 package at.thomasgorke.photofeed.ui.search
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import at.thomasgorke.photofeed.RepositoryResponse
+import at.thomasgorke.photofeed.data.FlickrDataSource
+import at.thomasgorke.photofeed.data.model.FeedItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class SearchScreenViewModel : ViewModel() {
+class SearchScreenViewModel(
+    private val flickrDataSource: FlickrDataSource
+) : ViewModel() {
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            state.map { it.query }
+                .distinctUntilChanged()
+                .filter { it.isBlank() || it.length > 2 }
+                .onEach { query ->
+                    when (query.isEmpty()) {
+                        true -> _state.update { it.copy(result = emptyList()) }
+                        false -> loadData(query)
+                    }
+                }
+                .launchIn(this)
+        }
+    }
+
+    private suspend fun loadData(query: String) {
+        val response = flickrDataSource.fetchFeedByTags(query)
+        when (response) {
+            is RepositoryResponse.Error -> { println("errorororororo") }
+            is RepositoryResponse.Success -> _state.update { it.copy(result = response.data) }
+        }
+    }
 
     fun execute(action: Action) {
         when (action) {
@@ -47,6 +82,6 @@ class SearchScreenViewModel : ViewModel() {
 
     data class State(
         val query: String = "",
-        val result: List<String> = emptyList()
+        val result: List<FeedItem> = emptyList()
     )
 }

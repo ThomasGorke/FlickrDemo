@@ -7,6 +7,5 @@ import org.koin.dsl.module
 
 internal val uiModule = module {
     viewModel { FeedScreenViewModel(dataSource = get()) }
-    viewModel { SearchScreenViewModel() }
+    viewModel { SearchScreenViewModel(flickrDataSource = get()) }
 }
-

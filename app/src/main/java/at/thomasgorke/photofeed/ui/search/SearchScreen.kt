@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,6 +41,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import at.thomasgorke.photofeed.R
+import at.thomasgorke.photofeed.data.model.DataState
+import at.thomasgorke.photofeed.data.model.FeedItem
+import at.thomasgorke.photofeed.ui.base.ContentErrorScreen
+import at.thomasgorke.photofeed.ui.base.ContentLoadingScreen
+import at.thomasgorke.photofeed.ui.base.FeedItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
@@ -53,7 +58,7 @@ fun SearchScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(connection = scrollBehavior.nestedScrollConnection),
@@ -86,7 +91,35 @@ fun SearchScreen(
                     viewModel.execute(SearchScreenViewModel.Action.TagSelected(it))
                 }
             )
+
+            FeedResultScreen(dataState = DataState.SUCCESS, results = state.result) {
+
+            }
         }
+    }
+}
+
+@Composable
+fun FeedResultScreen(
+    dataState: DataState,
+    results: List<FeedItem>,
+    retry: () -> Unit
+) {
+    when (dataState) {
+        DataState.SUCCESS -> {
+            LazyColumn {
+                items(results) {
+                    FeedItem(
+                        feedItem = it,
+                        toggleFavorite = { },
+                        open = { }
+                    )
+                }
+            }
+        }
+
+        DataState.LOADING -> ContentLoadingScreen()
+        DataState.ERROR -> ContentErrorScreen(retry = retry)
     }
 }
 

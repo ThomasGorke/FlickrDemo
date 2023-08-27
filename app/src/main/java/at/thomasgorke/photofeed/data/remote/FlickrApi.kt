@@ -9,6 +9,7 @@ interface FlickrApi {
     @GET("feeds/photos_public.gne")
     suspend fun getPublicPhotos(
         @Query("format") format: String = "json",
-        @Query("nojsoncallback") nojsoncallback: Boolean = true
+        @Query("nojsoncallback") nojsoncallback: Boolean = true,
+        @Query ("tags") tags: String? = null
     ): PublicFlickrPhotoResponse
 }

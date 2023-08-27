@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.thomasgorke.photofeed.RepositoryResponse
 import at.thomasgorke.photofeed.data.FlickrDataSource
+import at.thomasgorke.photofeed.data.model.DataState
 import at.thomasgorke.photofeed.data.model.FeedItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,12 +25,12 @@ class FeedScreenViewModel(
             dataSource.getFeedFlow()
                 .onEach { feedData ->
                     when (feedData) {
-                        is RepositoryResponse.Error -> {
-                            /* TODO show error */
+                        is RepositoryResponse.Error -> _state.update {
+                            it.copy(dataState = DataState.ERROR)
                         }
 
                         is RepositoryResponse.Success -> _state.update {
-                            it.copy(feed = feedData.data)
+                            it.copy(feed = feedData.data, dataState = DataState.SUCCESS)
                         }
                     }
                 }
@@ -40,17 +41,32 @@ class FeedScreenViewModel(
     fun execute(action: Action) {
         viewModelScope.launch {
             when (action) {
-                Action.Retry -> dataSource.fetchNewRemoteFeed()
+                Action.Retry -> reloadFeed()
+                is Action.Favorite -> dataSource.toggleFavorite(action.feedItem)
             }
+        }
+    }
+
+    private suspend fun reloadFeed() {
+        _state.update { it.copy(dataState = DataState.LOADING) }
+        when (dataSource.fetchNewRemoteFeed()) {
+            is RepositoryResponse.Error -> {
+                when (state.value.feed.isEmpty()) {
+                    false -> _state.update { it.copy(dataState = DataState.SUCCESS) }
+                    true -> _state.update { it.copy(dataState = DataState.ERROR) }
+                }
+            }
+            is RepositoryResponse.Success -> { /* nothing to do is the flow gets refreshed */ }
         }
     }
 
     data class State(
         val feed: List<FeedItem> = emptyList(),
-        val hasError: Boolean = false
+        val dataState: DataState = DataState.LOADING
     )
 
     sealed class Action {
         data object Retry : Action()
+        data class Favorite(val feedItem: FeedItem): Action()
     }
 }
