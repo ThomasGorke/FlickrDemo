@@ -46,6 +46,8 @@ import at.thomasgorke.photofeed.data.model.FeedItem
 import at.thomasgorke.photofeed.ui.base.ContentErrorScreen
 import at.thomasgorke.photofeed.ui.base.ContentLoadingScreen
 import at.thomasgorke.photofeed.ui.base.FeedItem
+import at.thomasgorke.photofeed.ui.destinations.ImageFullScreenDestination
+import at.thomasgorke.photofeed.ui.fullscreen.ImageFullScreen
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import org.koin.androidx.compose.koinViewModel
@@ -92,9 +94,13 @@ fun SearchScreen(
                 }
             )
 
-            FeedResultScreen(dataState = DataState.SUCCESS, results = state.result) {
-
-            }
+            FeedResultScreen(
+                dataState = state.dataState,
+                results = state.result,
+                retry = { viewModel.execute(SearchScreenViewModel.Action.Retry) },
+                toggleFavorite = { viewModel.execute(SearchScreenViewModel.Action.ToggleFavorite(it)) },
+                open = { navigator.navigate(ImageFullScreenDestination(imgUrl = it)) }
+            )
         }
     }
 }
@@ -103,7 +109,9 @@ fun SearchScreen(
 fun FeedResultScreen(
     dataState: DataState,
     results: List<FeedItem>,
-    retry: () -> Unit
+    retry: () -> Unit,
+    toggleFavorite: (FeedItem) -> Unit,
+    open: (String) -> Unit
 ) {
     when (dataState) {
         DataState.SUCCESS -> {
@@ -111,8 +119,8 @@ fun FeedResultScreen(
                 items(results) {
                     FeedItem(
                         feedItem = it,
-                        toggleFavorite = { },
-                        open = { }
+                        toggleFavorite = toggleFavorite,
+                        open = open
                     )
                 }
             }

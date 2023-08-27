@@ -9,9 +9,8 @@ interface FlickrLocalDataSource {
     suspend fun deleteExistingAndInsertNew(newFeed: List<PhotoEntity>)
 
     fun getFavoritesFlow(): Flow<List<FavoriteEntity>>
+    suspend fun getFavorites(): List<String>
     suspend fun deleteAllFavorites()
-    suspend fun addFavorite(favoriteEntity: FavoriteEntity)
-    suspend fun removeFavorite(url: String)
     suspend fun toggleFavorite(favoriteEntity: FavoriteEntity)
 }
 
@@ -32,16 +31,10 @@ class FlickrLocalDataSourceImpl(
         photoDao.deleteAll()
     }
 
-    override suspend fun addFavorite(favoriteEntity: FavoriteEntity) {
-        photoDao.addFavorite(favoriteEntity)
-    }
-
-    override suspend fun removeFavorite(url: String) {
-        photoDao.removeFavorite(url)
-    }
+    override suspend fun getFavorites(): List<String> = photoDao.getAllFavorites()
 
     override suspend fun toggleFavorite(favoriteEntity: FavoriteEntity) {
-        val favorites = photoDao.getAllFavorites()
+        val favorites = getFavorites()
         when (favorites.contains(favoriteEntity.mediaUrl)) {
             true -> { // remove from favorites
                 photoDao.removeFavorite(favoriteEntity.mediaUrl)

@@ -1,6 +1,5 @@
 package at.thomasgorke.photofeed.data
 
-import androidx.compose.runtime.saveable.autoSaver
 import at.thomasgorke.photofeed.RepositoryResponse
 import at.thomasgorke.photofeed.data.local.FlickrLocalDataSource
 import at.thomasgorke.photofeed.data.local.entity.FavoriteEntity
@@ -87,7 +86,14 @@ class FlickrDataSourceImpl(
 
                 is NetworkResponse.Success -> {
                     RepositoryResponse.Success(
-                        response.data.items.map { FeedItem(it.media.m, it.title, it.author, false) }
+                        response.data.items.map {
+                            FeedItem(
+                                imgUrl = it.media.m,
+                                title = it.title,
+                                author = it.author,
+                                isFavored = false
+                            )
+                        }
                     )
                 }
             }
