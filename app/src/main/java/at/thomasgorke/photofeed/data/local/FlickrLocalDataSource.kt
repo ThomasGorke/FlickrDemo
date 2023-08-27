@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface FlickrLocalDataSource {
     fun getFeedFlow(): Flow<List<PhotoEntity>>
     suspend fun deleteExistingAndInsertNew(newFeed: List<PhotoEntity>)
+    suspend fun deleteFeed()
 
     fun getFavoritesFlow(): Flow<List<FavoriteEntity>>
     suspend fun getFavorites(): List<String>
@@ -21,14 +22,19 @@ class FlickrLocalDataSourceImpl(
     override fun getFeedFlow(): Flow<List<PhotoEntity>> = photoDao.getPhotos()
 
     override suspend fun deleteExistingAndInsertNew(newFeed: List<PhotoEntity>) {
-        photoDao.deleteAll()
+        val oldPhotos = photoDao.getAllIds()
         photoDao.insertPhotos(newFeed)
+        photoDao.deleteByIds(oldPhotos)
+    }
+
+    override suspend fun deleteFeed() {
+        photoDao.deleteAll()
     }
 
     override fun getFavoritesFlow(): Flow<List<FavoriteEntity>> = photoDao.getFavorites()
 
     override suspend fun deleteAllFavorites() {
-        photoDao.deleteAll()
+        photoDao.removeAllFavorites()
     }
 
     override suspend fun getFavorites(): List<String> = photoDao.getAllFavorites()

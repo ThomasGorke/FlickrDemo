@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import at.thomasgorke.photofeed.R
 import at.thomasgorke.photofeed.data.model.DataState
 import at.thomasgorke.photofeed.data.model.FeedItem
+import at.thomasgorke.photofeed.ui.base.ContentEmptyScreen
 import at.thomasgorke.photofeed.ui.base.ContentErrorScreen
 import at.thomasgorke.photofeed.ui.base.ContentLoadingScreen
 import at.thomasgorke.photofeed.ui.base.FeedItem
@@ -75,7 +77,10 @@ fun SearchScreen(
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
         }
     ) { padding ->
@@ -115,13 +120,22 @@ fun FeedResultScreen(
 ) {
     when (dataState) {
         DataState.SUCCESS -> {
-            LazyColumn {
-                items(results) {
-                    FeedItem(
-                        feedItem = it,
-                        toggleFavorite = toggleFavorite,
-                        open = open
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            ) {
+                when (results.isEmpty()) {
+                    true -> ContentEmptyScreen(msgId = R.string.info_no_search_result)
+                    else -> LazyColumn {
+                        items(results) {
+                            FeedItem(
+                                feedItem = it,
+                                toggleFavorite = toggleFavorite,
+                                open = open
+                            )
+                        }
+                    }
                 }
             }
         }

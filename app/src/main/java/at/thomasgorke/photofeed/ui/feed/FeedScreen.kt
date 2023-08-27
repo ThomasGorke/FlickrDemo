@@ -86,19 +86,19 @@ fun FeedScreen(
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when (state.dataState) {
-                    DataState.ERROR -> ContentErrorScreen { viewModel.execute(FeedScreenViewModel.Action.Retry) }
-                    DataState.LOADING -> ContentLoadingScreen()
-                    DataState.SUCCESS -> FeedContent(
-                        feed = state.feed,
-                        toggleFavorite = { viewModel.execute(FeedScreenViewModel.Action.Favorite(it)) },
-                        open = { navigator.navigate(ImageFullScreenDestination(imgUrl = it)) }
-                    )
-                }
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
+            when (state.dataState) {
+                DataState.ERROR -> ContentErrorScreen { viewModel.execute(FeedScreenViewModel.Action.Retry) }
+                DataState.LOADING -> ContentLoadingScreen()
+                DataState.SUCCESS -> FeedContent(
+                    feed = state.feed,
+                    toggleFavorite = { viewModel.execute(FeedScreenViewModel.Action.Favorite(it)) },
+                    open = { navigator.navigate(ImageFullScreenDestination(imgUrl = it)) }
+                )
             }
         }
     }

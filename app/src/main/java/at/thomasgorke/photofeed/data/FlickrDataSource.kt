@@ -64,13 +64,13 @@ class FlickrDataSourceImpl(
                     RepositoryException.RemoteException(
                         response.throwable
                     )
-                ).also { println("Error fetch remote") }
+                )
 
                 is NetworkResponse.Success -> {
                     localDataSource.deleteExistingAndInsertNew(
                         response.data.items.map { PhotoEntity(it.media.m, it.author, it.title) }
                     )
-                    RepositoryResponse.Success(Unit).also { println("Success fetch remote") }
+                    RepositoryResponse.Success(Unit)
                 }
             }
         }
