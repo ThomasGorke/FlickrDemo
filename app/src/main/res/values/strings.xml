@@ -6,4 +6,5 @@
     <string name="title_search">Search</string>
     <string name="title_profile">Profile</string>
     <string name="placeholder_search">Enter tags</string>
+    <string name="title_favorite">Favorites</string>
 </resources>

@@ -1,5 +1,6 @@
 package at.thomasgorke.photofeed.data
 
+import androidx.compose.runtime.saveable.autoSaver
 import at.thomasgorke.photofeed.RepositoryResponse
 import at.thomasgorke.photofeed.data.local.FlickrLocalDataSource
 import at.thomasgorke.photofeed.data.local.entity.FavoriteEntity
@@ -14,6 +15,8 @@ import kotlinx.coroutines.flow.map
 
 interface FlickrDataSource {
     fun getFeedFlow(): Flow<RepositoryResponse<List<FeedItem>>>
+    fun getFavoritesFlow(): Flow<RepositoryResponse<List<FeedItem>>>
+
     suspend fun fetchNewRemoteFeed(): RepositoryResponse<Unit>
     suspend fun fetchFeedByTags(tags: String): RepositoryResponse<List<FeedItem>>
     suspend fun toggleFavorite(feedItem: FeedItem)
@@ -24,8 +27,8 @@ class FlickrDataSourceImpl(
     private val remoteDataSource: FlickrRemoteDataSource
 ) : FlickrDataSource {
 
-    override fun getFeedFlow(): Flow<RepositoryResponse<List<FeedItem>>> {
-        return combine(
+    override fun getFeedFlow(): Flow<RepositoryResponse<List<FeedItem>>> =
+        combine(
             localDataSource.getFeedFlow(),
             localDataSource.getFavoritesFlow()
         ) { response, favorites ->
@@ -40,7 +43,20 @@ class FlickrDataSourceImpl(
                 )
             }
         }.map { RepositoryResponse.Success(it) }
-    }
+
+    override fun getFavoritesFlow(): Flow<RepositoryResponse<List<FeedItem>>> =
+        localDataSource.getFavoritesFlow()
+            .map { favorites ->
+                favorites.map {
+                    FeedItem(
+                        imgUrl = it.mediaUrl,
+                        title = it.title,
+                        author = it.author,
+                        isFavored = true
+                    )
+                }
+            }
+            .map { RepositoryResponse.Success(it) }
 
     override suspend fun fetchNewRemoteFeed(): RepositoryResponse<Unit> =
         remoteDataSource.fetchPhotoFeed().let { response ->

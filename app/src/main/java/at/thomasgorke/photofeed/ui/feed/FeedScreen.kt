@@ -39,6 +39,7 @@ import at.thomasgorke.photofeed.data.model.FeedItem
 import at.thomasgorke.photofeed.ui.base.ContentErrorScreen
 import at.thomasgorke.photofeed.ui.base.ContentLoadingScreen
 import at.thomasgorke.photofeed.ui.base.FeedItem
+import at.thomasgorke.photofeed.ui.destinations.FavoriteScreenDestination
 import at.thomasgorke.photofeed.ui.destinations.ImageFullScreenDestination
 import at.thomasgorke.photofeed.ui.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
@@ -63,7 +64,7 @@ fun FeedScreen(
             MediumTopAppBar(
                 title = { Text(text = stringResource(id = R.string.title_feed)) },
                 actions = {
-                    IconButton(onClick = { navigator.navigate(SearchScreenDestination) }) {
+                    IconButton(onClick = { navigator.navigate(FavoriteScreenDestination) }) {
                         Icon(
                             imageVector = Icons.Default.FavoriteBorder,
                             contentDescription = "Favorites"
