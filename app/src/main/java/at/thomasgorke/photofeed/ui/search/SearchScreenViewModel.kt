@@ -88,8 +88,8 @@ class SearchScreenViewModel(
                     it.copy(
                         result = emptyList(),
                         dataState = when (it.query.criteriaFulfilled()) {
-                            true -> DataState.ERROR
-                            false -> DataState.SUCCESS
+                            true -> DataState.ERROR // only show error with retry when query is valid
+                            false -> DataState.SUCCESS // show empty list
                         }
                     )
                 }

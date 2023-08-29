@@ -23,10 +23,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -45,7 +51,12 @@ import at.thomasgorke.photofeed.ui.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.coroutines.EmptyCoroutineContext
 
 @RootNavGraph(start = true)
 @Destination
@@ -55,8 +66,20 @@ fun FeedScreen(
     viewModel: FeedScreenViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    LaunchedEffect(key1 = Unit) {
+        viewModel.snackText
+            .onEach { 
+                scope.launch { 
+                    snackbarHostState.showSnackbar(message = it)
+                }
+            }
+            .flowOn(EmptyCoroutineContext)
+            .launchIn(this)
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(connection = scrollBehavior.nestedScrollConnection),
@@ -83,6 +106,13 @@ fun FeedScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.execute(FeedScreenViewModel.Action.Retry) }) {
                 Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar {
+                    Text(text = data.visuals.message)
+                }
             }
         }
     ) { padding ->

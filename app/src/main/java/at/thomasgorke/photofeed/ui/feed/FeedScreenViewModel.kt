@@ -6,7 +6,9 @@ import at.thomasgorke.photofeed.RepositoryResponse
 import at.thomasgorke.photofeed.data.FlickrDataSource
 import at.thomasgorke.photofeed.data.model.DataState
 import at.thomasgorke.photofeed.data.model.FeedItem
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -19,6 +21,10 @@ class FeedScreenViewModel(
 
     private val _state = MutableStateFlow(State())
     val state = _state.asStateFlow()
+
+    // show info when reload fails and feed is not empty to not have an empty screen
+    private val _snackText = MutableSharedFlow<String>()
+    val snackText = _snackText.asSharedFlow()
 
     init {
         viewModelScope.launch {
