@@ -10,6 +10,7 @@ interface FlickrApi {
     suspend fun getPublicPhotos(
         @Query("format") format: String = "json",
         @Query("nojsoncallback") nojsoncallback: Boolean = true,
-        @Query ("tags") tags: String? = null
+        @Query("tags") tags: String? = null,
+        @Query("tagmode") tagMode: String? = null
     ): PublicFlickrPhotoResponse
 }

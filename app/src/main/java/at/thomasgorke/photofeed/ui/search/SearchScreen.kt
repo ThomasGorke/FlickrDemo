@@ -22,12 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -91,11 +93,15 @@ fun SearchScreen(
         ) {
             TagSearch(
                 input = state.query,
+                tagModeIsAll = state.tagModeIsAll,
                 update = {
                     viewModel.execute(SearchScreenViewModel.Action.Search(it))
                 },
                 tagSelected = {
                     viewModel.execute(SearchScreenViewModel.Action.TagSelected(it))
+                },
+                toggleTagMode = {
+                    viewModel.execute(SearchScreenViewModel.Action.ToggleTagMode)
                 }
             )
 
@@ -148,8 +154,10 @@ fun FeedResultScreen(
 @Composable
 private fun TagSearch(
     input: String,
+    tagModeIsAll: Boolean,
     update: (String) -> Unit,
-    tagSelected: (String) -> Unit
+    tagSelected: (String) -> Unit,
+    toggleTagMode: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
@@ -183,6 +191,22 @@ private fun TagSearch(
                     click = tagSelected
                 )
             }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Search All")
+            Checkbox(
+                modifier = Modifier.padding(start = 8.dp),
+                checked = tagModeIsAll,
+                onCheckedChange = {
+                    toggleTagMode()
+                }
+            )
         }
     }
 }

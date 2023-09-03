@@ -14,5 +14,8 @@ data class FavoriteEntity(
     val author: String,
 
     @ColumnInfo("title")
-    val title: String
+    val title: String,
+
+    @ColumnInfo("date_taken")
+    val dateTaken: String
 )

@@ -10,7 +10,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -28,19 +31,26 @@ class FeedScreenViewModel(
 
     init {
         viewModelScope.launch {
-            dataSource.getFeedFlow()
-                .onEach { feedData ->
-                    when (feedData) {
-                        is RepositoryResponse.Error -> _state.update {
-                            it.copy(dataState = DataState.ERROR)
-                        }
+            combine(
+                dataSource.getFeedFlow(),
+                state.map { it.sortByDate }.distinctUntilChanged()
+            ) { feedData, sortByDate ->
+                when (feedData) {
+                    is RepositoryResponse.Error -> _state.update {
+                        it.copy(dataState = DataState.ERROR)
+                    }
 
-                        is RepositoryResponse.Success -> _state.update {
-                            it.copy(feed = feedData.data, dataState = DataState.SUCCESS)
-                        }
+                    is RepositoryResponse.Success -> _state.update { state ->
+                        state.copy(
+                            feed = feedData.data.let { list ->
+                                if (sortByDate) list.sortedBy { it.dateTake }
+                                else list
+                            },
+                            dataState = DataState.SUCCESS
+                        )
                     }
                 }
-                .launchIn(this)
+            }.launchIn(this)
         }
     }
 
@@ -49,6 +59,7 @@ class FeedScreenViewModel(
             when (action) {
                 Action.Retry -> reloadFeed()
                 is Action.Favorite -> dataSource.toggleFavorite(action.feedItem)
+                Action.ToggleSortOption -> _state.update { it.copy(sortByDate = !it.sortByDate) }
             }
         }
     }
@@ -68,11 +79,13 @@ class FeedScreenViewModel(
 
     data class State(
         val feed: List<FeedItem> = emptyList(),
-        val dataState: DataState = DataState.LOADING
+        val dataState: DataState = DataState.LOADING,
+        val sortByDate: Boolean = false
     )
 
     sealed class Action {
         data object Retry : Action()
         data class Favorite(val feedItem: FeedItem): Action()
+        data object ToggleSortOption: Action()
     }
 }

@@ -17,6 +17,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.util.Date
 
 class FeedScreenViewModelTest {
 
@@ -33,6 +34,8 @@ class FeedScreenViewModelTest {
         MockKAnnotations.init(this)
     }
 
+    private val testDate = Date()
+
     /**
      * As some test results depend on the initial flow, it is not possible to define
      * it in the setup
@@ -40,7 +43,7 @@ class FeedScreenViewModelTest {
     private fun initViewModel(successBehavior: Boolean = true) {
         if (successBehavior) {
             every { dataSource.getFeedFlow() } returns flowOf(
-                RepositoryResponse.Success(listOf(FeedItem("url", "title", "author", false)))
+                RepositoryResponse.Success(listOf(FeedItem("url", "title", "author", false, testDate)))
             )
         } else {
             every { dataSource.getFeedFlow() } returns flowOf(RepositoryResponse.Success(emptyList()))
@@ -98,7 +101,7 @@ class FeedScreenViewModelTest {
         coVerify(exactly = 1) { dataSource.fetchNewRemoteFeed() }
         assertEquals(DataState.SUCCESS, viewModel.state.value.dataState)
         assertEquals(
-            listOf(FeedItem("url", "title", "author", false)),
+            listOf(FeedItem("url", "title", "author", false, testDate)),
             viewModel.state.value.feed
         )
     }

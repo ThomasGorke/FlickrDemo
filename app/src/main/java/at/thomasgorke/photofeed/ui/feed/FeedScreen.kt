@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -33,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -69,11 +72,11 @@ fun FeedScreen(
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    
+
     LaunchedEffect(key1 = Unit) {
         viewModel.snackText
-            .onEach { 
-                scope.launch { 
+            .onEach {
+                scope.launch {
                     snackbarHostState.showSnackbar(message = it)
                 }
             }
@@ -124,11 +127,31 @@ fun FeedScreen(
             when (state.dataState) {
                 DataState.ERROR -> ContentErrorScreen { viewModel.execute(FeedScreenViewModel.Action.Retry) }
                 DataState.LOADING -> ContentLoadingScreen()
-                DataState.SUCCESS -> FeedContent(
-                    feed = state.feed,
-                    toggleFavorite = { viewModel.execute(FeedScreenViewModel.Action.Favorite(it)) },
-                    open = { navigator.navigate(ImageFullScreenDestination(imgUrl = it)) }
-                )
+                DataState.SUCCESS -> Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Sort by date",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                        Switch(
+                            modifier = Modifier.padding(start = 16.dp),
+                            checked = state.sortByDate,
+                            onCheckedChange = {
+                                viewModel.execute(FeedScreenViewModel.Action.ToggleSortOption)
+                            }
+                        )
+                    }
+                    FeedContent(
+                        feed = state.feed,
+                        toggleFavorite = { viewModel.execute(FeedScreenViewModel.Action.Favorite(it)) },
+                        open = { navigator.navigate(ImageFullScreenDestination(imgUrl = it)) }
+                    )
+                }
             }
         }
     }

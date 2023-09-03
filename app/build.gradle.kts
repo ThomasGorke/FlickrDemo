@@ -130,4 +130,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
     testImplementation("io.mockk:mockk:1.13.7")
+    testImplementation("app.cash.turbine:turbine:0.6.0")
 }
